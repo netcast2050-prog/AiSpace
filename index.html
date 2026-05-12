@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 시작 페이지</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    border-bottom: 1px solid #1e2433;
+    background: #0d1018;
+  }
+  .logo { font-size: 1.1rem; font-weight: 600; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; }
+  #clock { font-size: 1.4rem; font-weight: 700; color: #e2e8f0; }
+  #date-str { font-size: 0.85rem; color: #64748b; text-align: right; margin-top: 2px; }
+
+  .main { display: grid; grid-template-columns: 340px 1fr; gap: 24px; padding: 30px 40px; max-width: 1400px; margin: 0 auto; }
+
+  .card {
+    background: #151b27;
+    border: 1px solid #1e2d45;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a6fa5;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: #1e2d45; }
+
+  /* Weather */
+  #weather-card { margin-bottom: 24px; }
+  .weather-main { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .weather-icon { font-size: 3.5rem; }
+  .weather-temp { font-size: 3rem; font-weight: 700; color: #f1f5f9; }
+  .weather-unit { font-size: 1.2rem; color: #64748b; }
+  .weather-desc { font-size: 0.95rem; color: #94a3b8; margin-top: 4px; }
+  .weather-location { font-size: 0.8rem; color: #4a6fa5; margin-top: 2px; }
+  .weather-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .weather-detail-item { background: #0f1420; border-radius: 8px; padding: 10px 12px; }
+  .detail-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+  .detail-value { font-size: 1rem; font-weight: 600; color: #cbd5e1; margin-top: 2px; }
+
+  /* Quick links */
+  #links-card { }
+  .links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .link-item {
+    background: #0f1420;
+    border: 1px solid #1e2d45;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .link-item:hover { background: #1a2535; color: #e2e8f0; border-color: #4a6fa5; }
+  .link-icon { font-size: 1.1rem; }
+
+  /* News */
+  .news-col { display: flex; flex-direction: column; gap: 0; }
+  .news-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .news-tabs { display: flex; gap: 8px; }
+  .tab-btn {
+    background: none;
+    border: 1px solid #1e2d45;
+    color: #64748b;
+    font-size: 0.72rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn.active, .tab-btn:hover { background: #4a6fa5; border-color: #4a6fa5; color: #fff; }
+  .news-refresh { background: none; border: none; color: #4a6fa5; cursor: pointer; font-size: 0.8rem; }
+  .news-list { display: flex; flex-direction: column; gap: 12px; }
+  .news-item {
+    background: #0f1420;
+    border: 1px solid #1e2d45;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .news-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #4a6fa5; border-radius: 3px 0 0 3px; }
+  .news-item:hover { background: #1a2535; border-color: #4a6fa5; }
+  .news-item-title { font-size: 0.88rem; font-weight: 600; color: #e2e8f0; line-height: 1.4; margin-bottom: 6px; }
+  .news-item-meta { display: flex; gap: 12px; align-items: center; }
+  .news-source { font-size: 0.7rem; color: #4a6fa5; font-weight: 600; }
+  .news-time { font-size: 0.7rem; color: #475569; }
+  .news-summary { font-size: 0.77rem; color: #64748b; line-height: 1.5; margin-top: 6px; }
+  .news-loading { text-align: center; padding: 40px; color: #475569; }
+  .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid #1e2d45; border-top-color: #4a6fa5; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-bar { text-align: center; padding: 8px; font-size: 0.7rem; color: #334155; border-top: 1px solid #1e2d45; margin-top: auto; }
+
+  .weather-loading { text-align: center; padding: 30px; color: #475569; }
+  .error-msg { color: #ef4444; font-size: 0.8rem; text-align: center; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⬡ My Dashboard</div>
+  <div style="text-align:right">
+    <div id="clock">--:--:--</div>
+    <div id="date-str">로딩 중...</div>
+  </div>
+</header>
+
+<div class="main">
+  <!-- LEFT -->
+  <div>
+    <div class="card" id="weather-card">
+      <div class="card-title">🌤 날씨</div>
+      <div id="weather-body"><div class="weather-loading"><div class="spinner"></div><br>위치 확인 중...</div></div>
+    </div>
+    <div class="card" id="links-card">
+      <div class="card-title">🔗 빠른 링크</div>
+      <div class="links-grid">
+        <a class="link-item" href="https://www.google.com" target="_blank"><span class="link-icon">🔍</span>Google</a>
+        <a class="link-item" href="https://gmail.com" target="_blank"><span class="link-icon">📧</span>Gmail</a>
+        <a class="link-item" href="https://github.com" target="_blank"><span class="link-icon">💻</span>GitHub</a>
+        <a class="link-item" href="https://www.youtube.com" target="_blank"><span class="link-icon">▶️</span>YouTube</a>
+        <a class="link-item" href="https://claude.ai" target="_blank"><span class="link-icon">🤖</span>Claude AI</a>
+        <a class="link-item" href="https://notion.so" target="_blank"><span class="link-icon">📝</span>Notion</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: NEWS -->
+  <div class="card news-col">
+    <div class="news-header">
+      <div class="card-title" style="margin-bottom:0">📰 주요 뉴스</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="news-tabs">
+          <button class="tab-btn active" onclick="loadNews(this,'종합')">종합</button>
+          <button class="tab-btn" onclick="loadNews(this,'기술 IT')">기술</button>
+          <button class="tab-btn" onclick="loadNews(this,'경제 금융')">경제</button>
+          <button class="tab-btn" onclick="loadNews(this,'세계')">세계</button>
+        </div>
+        <button class="news-refresh" onclick="loadNews(document.querySelector('.tab-btn.active'), currentCategory)" title="새로고침">↻</button>
+      </div>
+    </div>
+    <div id="news-body"><div class="news-loading"><div class="spinner"></div><br>뉴스 불러오는 중...</div></div>
+    <div class="status-bar" id="news-updated"></div>
+  </div>
+</div>
+
+<script>
+// ─── CLOCK ───────────────────────────────────────────
+const days = ['일','월','화','수','목','금','토'];
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  const yd = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+  document.getElementById('date-str').textContent = yd;
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// ─── WEATHER ─────────────────────────────────────────
+const weatherIcons = {
+  0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',
+  51:'🌦',53:'🌧',55:'🌧',61:'🌧',63:'🌧',65:'🌧',
+  71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',
+  95:'⛈',96:'⛈',99:'⛈'
+};
+const weatherDescs = {
+  0:'맑음',1:'대체로 맑음',2:'부분적으로 흐림',3:'흐림',
+  45:'안개',48:'안개',51:'가벼운 이슬비',53:'이슬비',55:'강한 이슬비',
+  61:'가벼운 비',63:'비',65:'강한 비',71:'가벼운 눈',73:'눈',75:'강한 눈',
+  80:'소나기',81:'강한 소나기',82:'폭우',95:'뇌우',96:'뇌우(우박)',99:'강한 뇌우'
+};
+
+function getWindDir(deg) {
+  const dirs = ['북','북동','동','남동','남','남서','서','북서'];
+  return dirs[Math.round(deg/45)%8];
+}
+
+async function loadWeather(lat, lon, cityName) {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FSeoul&forecast_days=3`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    if (!d.current) throw new Error('no current data');
+    // normalize: API returns weather_code, map to weathercode
+    d.current.weathercode = d.current.weather_code ?? d.current.weathercode ?? 0;
+    const c = d.current;
+    const daily = d.daily;
+    const icon = weatherIcons[c.weathercode] || '🌡';
+    const desc = weatherDescs[c.weathercode] || '날씨 정보';
+    const dayNames = ['오늘','내일','모레'];
+    const forecastHTML = daily.time.slice(0,3).map((t,i) => `
+      <div style="background:#0f1420;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.7rem;color:#64748b;margin-bottom:4px">${dayNames[i]}</div>
+        <div style="font-size:1.4rem">${weatherIcons[c.weathercode]||'🌡'}</div>
+        <div style="font-size:0.8rem;color:#e2e8f0;margin-top:4px">${Math.round(daily.temperature_2m_max[i])}° / ${Math.round(daily.temperature_2m_min[i])}°</div>
+        <div style="font-size:0.7rem;color:#4a6fa5;margin-top:2px">🌂 ${daily.precipitation_probability_max[i]}%</div>
+      </div>`).join('');
+    document.getElementById('weather-body').innerHTML = `
+      <div class="weather-main">
+        <div class="weather-icon">${icon}</div>
+        <div>
+          <div><span class="weather-temp">${Math.round(c.temperature_2m)}</span><span class="weather-unit">°C</span></div>
+          <div class="weather-desc">${desc}</div>
+          <div class="weather-location">📍 ${cityName}</div>
+        </div>
+      </div>
+      <div class="weather-details">
+        <div class="weather-detail-item"><div class="detail-label">체감온도</div><div class="detail-value">${Math.round(c.apparent_temperature)}°C</div></div>
+        <div class="weather-detail-item"><div class="detail-label">습도</div><div class="detail-value">${c.relative_humidity_2m}%</div></div>
+        <div class="weather-detail-item"><div class="detail-label">풍속</div><div class="detail-value">${c.wind_speed_10m} km/h</div></div>
+        <div class="weather-detail-item"><div class="detail-label">풍향</div><div class="detail-value">${getWindDir(c.wind_direction_10m)}</div></div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-size:0.7rem;color:#4a6fa5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">3일 예보</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${forecastHTML}</div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('weather-body').innerHTML = `<div class="error-msg">날씨 정보를 불러올 수 없습니다.<br><small style="color:#475569">${e.message}</small><br><br><button onclick="loadWeather(37.5665,126.9780,'서울')" style="margin-top:8px;background:#4a6fa5;border:none;color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer">서울로 다시 시도</button></div>`;
+  }
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const res = await fetch(`https://geocode.maps.co/reverse?lat=${lat}&lon=${lon}&api_key=free`);
+    const d = await res.json();
+    return d.address?.city || d.address?.county || d.address?.state || '현재 위치';
+  } catch {
+    // fallback: ip-api (no CORS issue)
+    try {
+      const res2 = await fetch('https://ip-api.com/json/?lang=ko&fields=city,regionName');
+      const d2 = await res2.json();
+      return d2.city || d2.regionName || '현재 위치';
+    } catch { return '현재 위치'; }
+  }
+}
+
+function initWeather() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const {latitude:lat, longitude:lon} = pos.coords;
+      const city = await reverseGeocode(lat, lon);
+      loadWeather(lat, lon, city);
+    }, async () => {
+      // 위치 거부 시 IP 기반 위치 사용
+      try {
+        const res = await fetch('https://ip-api.com/json/?lang=ko&fields=lat,lon,city');
+        const d = await res.json();
+        if (d.lat) loadWeather(d.lat, d.lon, d.city || '현재 위치');
+        else loadWeather(37.5665, 126.9780, '서울');
+      } catch { loadWeather(37.5665, 126.9780, '서울'); }
+    });
+  } else {
+    loadWeather(37.5665, 126.9780, '서울');
+  }
+}
+
+// ─── NEWS ─────────────────────────────────────────────
+let currentCategory = '종합';
+
+async function loadNews(btn, category) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCategory = category;
+  document.getElementById('news-body').innerHTML = `<div class="news-loading"><div class="spinner"></div><br>${category} 뉴스 검색 중...</div>`;
+  document.getElementById('news-updated').textContent = '';
+
+  const prompt = `지금 당장 ${category} 분야의 오늘 주요 뉴스 8개를 JSON 배열로만 응답하세요. 다른 말은 하지 마세요. 형식:
+[{"title":"뉴스 제목","source":"언론사","summary":"한 줄 요약(40자 이내)","time":"X시간 전 또는 방금"}]
+실제로 오늘 있었을 법한 뉴스를 작성하세요.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        tools:[{"type":"web_search_20250305","name":"web_search"}],
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    const data = await res.json();
+
+    // extract text from content blocks
+    let text = '';
+    for (const block of data.content || []) {
+      if (block.type === 'text') text += block.text;
+    }
+    const clean = text.replace(/```json|```/g,'').trim();
+    const start = clean.indexOf('[');
+    const end = clean.lastIndexOf(']');
+    if (start === -1) throw new Error('No JSON');
+    const news = JSON.parse(clean.slice(start, end+1));
+
+    const html = news.map(n => `
+      <div class="news-item">
+        <div class="news-item-title">${n.title}</div>
+        <div class="news-item-meta">
+          <span class="news-source">${n.source}</span>
+          <span class="news-time">${n.time}</span>
+        </div>
+        <div class="news-summary">${n.summary}</div>
+      </div>`).join('');
+
+    document.getElementById('news-body').innerHTML = `<div class="news-list">${html}</div>`;
+    const now = new Date();
+    document.getElementById('news-updated').textContent = `마지막 업데이트: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  } catch(e) {
+    document.getElementById('news-body').innerHTML = `<div class="error-msg">뉴스를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>`;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────
+initWeather();
+loadNews(document.querySelector('.tab-btn.active'), '종합');
+</script>
+</body>
+</html>
